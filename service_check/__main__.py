@@ -1,0 +1,66 @@
+#!/usr/bin/env python
+import argparse
+import sqlite_connection, util, service
+
+# Completed features
+# 1. Auto initialize the database
+# 2. Prett print the contents of the database as the default if no parameters are selected
+# 3. Provided functionality to insert new services into the database. Inserting existing records do nothing
+
+# Todo
+# 1. Provide functionality to delete a record based on unique ID
+# 2. Build ansible class to run ansible
+# 3. Include colorama functionality to printing the content
+# 4. Provide a watch subcommand that rechecks the service status every X seconds
+# 5. Potentially add a 'show' subparser to customize output formatting
+def main():
+	
+	parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
+	parser.add_argument('--db', help='Path to Sqlite database',
+						default='db/services.sql')
+
+	init_script = 'scripts/create-service-db.sql'
+	select_script = 'scripts/select-service.sql'
+
+	# Create sub parsers
+	subparsers = parser.add_subparsers(dest='subparser_name')
+	insert_parser = subparsers.add_parser('insert')
+	delete_parser = subparsers.add_parser('delete')
+
+
+	# Create sub options for insert parser
+	insert_parser.add_argument('--hostname', help='Hostname of server running service', required=True)
+	insert_parser.add_argument('--servicename', help='Name the host uses to identify the service', required=True)
+	insert_parser.add_argument('--port', help='Numerical port the service listens on', required=True)
+	insert_parser.add_argument('--protocol', help='Protocol the service runs on', required=True,
+								choices=[ 'tcp', 'udp' ])
+
+	args = parser.parse_args()
+
+	# Create our objects
+	with sqlite_connection.SqliteConnection(args.db) as conn:
+		svc = service.Service()
+
+		# Initialize the database if no tables exist
+		if conn.empty == 1:
+			svc.init_script = init_script
+			conn.cursor.executescript(util.read_file(svc.init_script))
+			conn.conn.commit()
+			print('Database was initialized')
+	
+		# Store the records of the database in a variable
+		svc.select_script = select_script
+		conn.cursor.execute(util.read_file(svc.select_script))
+		svc.set_records(conn.cursor)
+	
+		# Perform main program logic
+		# --------------------------
+		# If no options are selected, pretty print content of the database
+		if args.subparser_name is None:
+				svc.pprint()
+		elif args.subparser_name == 'insert':
+				insert_args = (args.hostname, args.servicename, args.port, args.protocol)
+				svc.insert_record(conn.cursor, insert_args)
+
+if __name__ == '__main__':
+		main()

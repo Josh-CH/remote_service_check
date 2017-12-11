@@ -11,27 +11,14 @@ class SqliteConnection():
 		self.cursor = self.conn.cursor()
 		self.empty = self.is_empty()
 
-#		init = 0
-#		try:
-#			util.file_exists(db)
-#		except FileNotFoundError:
-#			init = 1	
-#		finally:
-#			self.db = os.path.abspath(db)
-#			self.conn = sqlite3.connect(self.db)
-#			self.cursor = self.conn.cursor()
-#			if init == 1:
-#				self.cursor.executescript(util.read_file(init_script))
-
 	def __repr__(self):
 			return '{0}(db={1}, conn={2}, cursor={3}, empty={4})'.format(self.__class__.__name__, 
 																		self.db, 
 																		self.conn, 
 																		self.cursor, 
 																		self.empty)
-
 	def __enter__(self):
-			return Sqlite_Connection(self.db)
+			return SqliteConnection(self.db)
 
 	def __exit__(self, exc_type, exc_val, exc_tb):
 			if self.conn:
