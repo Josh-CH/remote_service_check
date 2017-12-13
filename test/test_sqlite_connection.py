@@ -8,6 +8,6 @@ class TestSqliteConnection(unittest.TestCase):
 		def tearDown(self):
 			pass
 
-		def test_db_initialization(
+#		def test_db_initialization(
 if __name__ == '__main__':
 		unittest.main()
