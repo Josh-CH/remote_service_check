@@ -13,12 +13,15 @@ import sqlite_connection, util, service
 # 3. Include colorama functionality to printing the content
 # 4. Provide a watch subcommand that rechecks the service status every X seconds
 # 5. Potentially add a 'show' subparser to customize output formatting
+# 6. Convert my module imports to work with packages when I am ready to deploy
 def main():
 	
 	parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument('--db', help='Path to Sqlite database',
 						default='db/services.sql')
 
+	# NOTICE:
+	# Redefine these variables as private variables in the service class
 	init_script = 'scripts/create-service-db.sql'
 	select_script = 'scripts/select-service.sql'
 
@@ -35,10 +38,16 @@ def main():
 	insert_parser.add_argument('--protocol', help='Protocol the service runs on', required=True,
 								choices=[ 'tcp', 'udp' ])
 
+	# Create sub options for delete parser
+	delete_parser.add_argument('--id', help='id of service to delete', required=True)
+
+	# Parse the arguments
 	args = parser.parse_args()
 
 	# Create our objects
 	with sqlite_connection.SqliteConnection(args.db) as conn:
+		# Make foreign key support explicit
+		conn.cursor.execute('pragma foreign_keys=ON;')
 		svc = service.Service()
 
 		# Initialize the database if no tables exist
@@ -61,6 +70,9 @@ def main():
 		elif args.subparser_name == 'insert':
 				insert_args = (args.hostname, args.servicename, args.port, args.protocol)
 				svc.insert_record(conn.cursor, insert_args)
+		elif args.subparser_name == 'delete':
+				delete_args = (args.id)
+				svc.delete_record(conn.cursor, delete_args)
 
 if __name__ == '__main__':
 		main()
