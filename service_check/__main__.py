@@ -71,7 +71,7 @@ def main():
 				insert_args = (args.hostname, args.servicename, args.port, args.protocol)
 				svc.insert_record(conn.cursor, insert_args)
 		elif args.subparser_name == 'delete':
-				delete_args = (args.id)
+				delete_args = (args.id,)
 				svc.delete_record(conn.cursor, delete_args)
 
 if __name__ == '__main__':
