@@ -22,4 +22,3 @@ def read_file(_file):
 				print(e)
 				raise SystemExit
 		return data
-

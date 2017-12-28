@@ -81,7 +81,7 @@ class Service():
 		"""
 		args:
 			cursor - SQL cursor
-			primary_id - Primray key of the Host_Service table. 
+			primary_id - Primary key of the Host_Service table. 
 					Displayed by default output of program as 'Id'
 		"""
 		cursor.execute(self._sql_delete_host_service, primary_id)

@@ -1,19 +1,19 @@
 #!/usr/bin/env python
 import argparse
-import sqlite_connection, util, service
+import sqlite_connection, util, service, ansible_executor
 
 # Completed features
 # 1. Auto initialize the database
 # 2. Prett print the contents of the database as the default if no parameters are selected
 # 3. Provided functionality to insert new services into the database. Inserting existing records do nothing
+# 4. Provide functionality to delete a record based on unique ID
 
 # Todo
-# 1. Provide functionality to delete a record based on unique ID
-# 2. Build ansible class to run ansible
-# 3. Include colorama functionality to printing the content
-# 4. Provide a watch subcommand that rechecks the service status every X seconds
-# 5. Potentially add a 'show' subparser to customize output formatting
-# 6. Convert my module imports to work with packages when I am ready to deploy
+# 1. Build ansible class to run ansible
+# 2. Include colorama functionality to printing the content
+# 3. Provide a watch subcommand that rechecks the service status every X seconds
+# 4. Potentially add a 'show' subparser to customize output formatting
+# 5. Convert my module imports to work with packages when I am ready to deploy
 def main():
 	
 	parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
@@ -24,12 +24,13 @@ def main():
 	# Redefine these variables as private variables in the service class
 	init_script = 'scripts/create-service-db.sql'
 	select_script = 'scripts/select-service.sql'
+	remote_script = 'scripts/service_check.sh'
 
 	# Create sub parsers
 	subparsers = parser.add_subparsers(dest='subparser_name')
 	insert_parser = subparsers.add_parser('insert')
 	delete_parser = subparsers.add_parser('delete')
-
+	check_parser = subparsers.add_parser('check')
 
 	# Create sub options for insert parser
 	insert_parser.add_argument('--hostname', help='Hostname of server running service', required=True)
@@ -40,6 +41,10 @@ def main():
 
 	# Create sub options for delete parser
 	delete_parser.add_argument('--id', help='id of service to delete', required=True)
+
+	# Create sub options for check parser
+	check_parser.add_argument('--remote-script', help='script to run on remote host through ansibles script module',
+						default = remote_script)
 
 	# Parse the arguments
 	args = parser.parse_args()
@@ -73,6 +78,9 @@ def main():
 		elif args.subparser_name == 'delete':
 				delete_args = (args.id,)
 				svc.delete_record(conn.cursor, delete_args)
+		elif args.subparser_name == 'check':
+				remote_exec = ansible_executor.Ansible_Executor(svc.records, args.remote_script) 
+				remote_exec.execute()
 
 if __name__ == '__main__':
 		main()
