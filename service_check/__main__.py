@@ -2,17 +2,6 @@
 import argparse
 import sqlite_connection, util, service, ansible_executor
 
-# Completed features
-# 1. Auto initialize the database
-# 2. Prett print the contents of the database as the default if no parameters are selected
-# 3. Provided functionality to insert new services into the database. Inserting existing records do nothing
-# 4. Provide functionality to delete a record based on unique ID
-
-# Todo
-# 1. Build ansible class to run ansible
-# 2. Include colorama functionality to printing the content
-# 3. Provide a watch subcommand that rechecks the service status every X seconds
-# 4. Potentially add a 'show' subparser to customize output formatting
 # 5. Convert my module imports to work with packages when I am ready to deploy
 def main():
 	
