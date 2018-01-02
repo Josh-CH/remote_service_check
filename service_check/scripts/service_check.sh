@@ -11,7 +11,14 @@ function service_check {
 	local proto="${3}"
 	
 	FAIL=0
-	/usr/bin/systemctl status "${service_name}"  > /dev/null 2>&1
+	
+	# Check if we are running RedHat 6 or 7 for service checking
+	if [[ $(awk '{print $7}' /etc/redhat-release) =~ ^6 ]]; then
+		/sbin/service "${service_name}" status > /dev/null 2>&1
+	else
+		/usr/bin/systemctl status "${service_name}"  > /dev/null 2>&1
+	fi
+	
 	if [[ "$?" -ne 0 ]]; then
 		FAIL=1
 	fi
