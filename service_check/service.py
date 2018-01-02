@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import util
-import sqlite3
+from service_check import util
+import sqlite3, os, sys
 
 class Service():
 	""" Service object used to interact with Sqlite database 
+	Parameters:
+		root_dir - path of the package root location
 	Properties:
 		records - iterable containing results of SQLite select query
 		init_script - SQL script used to create the database tables
@@ -13,14 +15,14 @@ class Service():
 		_sql_insert_host - SQL command to insert into the Host table
 		_sql_insert_host_service - SQL command to insert into the Host_Service table
 	"""
-	def __init__(self):
+	def __init__(self, root_dir):
 			self._records = None
 			self._init_script = None
 			self._select_script = None
-			self._sql_insert_service = util.read_file('scripts/insert-service.sql')
-			self._sql_insert_host = util.read_file('scripts/insert-host.sql')
-			self._sql_insert_host_service = util.read_file('scripts/insert-host_service.sql')
-			self._sql_delete_host_service = util.read_file('scripts/delete-host_service.sql')
+			self._sql_insert_service = util.read_file(os.path.join(root_dir, 'scripts/insert-service.sql'))
+			self._sql_insert_host = util.read_file(os.path.join(root_dir, 'scripts/insert-host.sql'))
+			self._sql_insert_host_service = util.read_file(os.path.join(root_dir, 'scripts/insert-host_service.sql'))
+			self._sql_delete_host_service = util.read_file(os.path.join(root_dir, 'scripts/delete-host_service.sql'))
 
 	@property
 	def records(self): return self._records

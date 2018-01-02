@@ -1,19 +1,19 @@
 #!/usr/bin/env python
-import argparse
-import sqlite_connection, util, service, ansible_executor
+import argparse, os, sys
+from service_check import sqlite_connection, util, service, ansible_executor
+PACKAGE_ROOT = os.path.dirname(service.__file__)
 
-# 5. Convert my module imports to work with packages when I am ready to deploy
 def main():
 	
 	parser = argparse.ArgumentParser(formatter_class = argparse.ArgumentDefaultsHelpFormatter)
 	parser.add_argument('--db', help='Path to Sqlite database',
-						default='db/services.sql')
+						default=os.path.join(PACKAGE_ROOT, 'db/services.sql'))
 
 	# NOTICE:
 	# Redefine these variables as private variables in the service class
-	init_script = 'scripts/create-service-db.sql'
-	select_script = 'scripts/select-service.sql'
-	remote_script = 'scripts/service_check.sh'
+	init_script = os.path.join(PACKAGE_ROOT, 'scripts/create-service-db.sql')
+	select_script = os.path.join(PACKAGE_ROOT, 'scripts/select-service.sql')
+	remote_script = os.path.join(PACKAGE_ROOT, 'scripts/service_check.sh')
 
 	# Create sub parsers
 	subparsers = parser.add_subparsers(dest='subparser_name')
@@ -42,7 +42,7 @@ def main():
 	with sqlite_connection.SqliteConnection(args.db) as conn:
 		# Make foreign key support explicit
 		conn.cursor.execute('pragma foreign_keys=ON;')
-		svc = service.Service()
+		svc = service.Service(PACKAGE_ROOT)
 
 		# Initialize the database if no tables exist
 		if conn.empty == 1:
