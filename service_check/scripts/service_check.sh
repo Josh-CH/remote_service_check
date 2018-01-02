@@ -11,15 +11,19 @@ function service_check {
 	local proto="${3}"
 	
 	FAIL=0
+	LACKS_PERMISSION_SO_SKIP=0
 	
 	# Check if we are running RedHat 6 or 7 for service checking
 	if [[ $(awk '{print $7}' /etc/redhat-release) =~ ^6 ]]; then
 		/sbin/service "${service_name}" status > /dev/null 2>&1
+		if [[ "$?" -eq 4 ]]; then
+			LACKS_PERMISSION_SO_SKIP=1
+		fi
 	else
 		/usr/bin/systemctl status "${service_name}"  > /dev/null 2>&1
 	fi
 	
-	if [[ "$?" -ne 0 ]]; then
+	if [[ "$?" -ne 0 ]] && [[ "${LACKS_PERMISSION_SO_SKIP}" -eq 0 ]]; then
 		FAIL=1
 	fi
 
